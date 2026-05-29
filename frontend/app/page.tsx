@@ -1,240 +1,177 @@
-'use client';
+"use client"
 
-import { motion } from 'framer-motion';
-import Link from 'next/link';
-import { BookOpen, Users, Timer, Zap, ArrowRight, Star, TrendingUp, MessageSquare } from 'lucide-react';
-import { ROUTES } from '@/constants';
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { BookOpen, Users, Timer, ArrowRight, BarChart, MessageSquare } from "lucide-react"
+import { ROUTES } from "@/constants"
+import { Navbar } from "@/components/layout/navbar"
+import { SectionContainer } from "@/components/layout/section-container"
+import { PageContainer } from "@/components/layout/page-container"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 const features = [
   {
     icon: Timer,
-    title: 'Live Session Timers',
-    desc: 'Start group study sessions with a live countdown everyone in the room can see in real time.',
+    title: "Live Session Timers",
+    desc: "Start group study sessions with a live countdown everyone in the room can see in real time.",
   },
   {
     icon: MessageSquare,
-    title: 'Built-in Room Chat',
-    desc: 'Communicate with your study partners without leaving the platform. System events keep everyone informed.',
+    title: "Built-in Room Chat",
+    desc: "Communicate with your study partners seamlessly. System events keep everyone informed.",
   },
   {
     icon: Users,
-    title: 'Presence Indicators',
-    desc: 'See exactly who is in the room right now with live online indicators and participant lists.',
+    title: "Presence Indicators",
+    desc: "See exactly who is in the room right now with live online indicators and participant lists.",
   },
   {
-    icon: TrendingUp,
-    title: 'Progress Analytics',
-    desc: 'Track your weekly study hours, session streaks, and personal bests with beautiful charts.',
+    icon: BarChart,
+    title: "Progress Analytics",
+    desc: "Track your weekly study hours, session streaks, and personal bests with clean analytics.",
   },
-];
-
-const steps = [
-  { step: '01', title: 'Create a Room', desc: 'Set up your virtual study space in seconds. Choose public or private with custom invite codes.' },
-  { step: '02', title: 'Invite Friends', desc: 'Share your unique invite code. Your study group joins instantly — no sign-up friction.' },
-  { step: '03', title: 'Focus Together', desc: 'Start a session, watch the timer, chat, and build a consistent study habit as a team.' },
-];
+]
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
-      {/* ── Navbar ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-4"
-        style={{ background: 'rgba(10,14,26,0.8)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--border-subtle)' }}>
-        <div className="flex items-center gap-2">
-          <BookOpen size={22} style={{ color: 'var(--accent-primary)' }} />
-          <span className="font-display text-xl font-bold" style={{ color: 'var(--text-primary)' }}>StudyRoom</span>
-        </div>
-        <div className="hidden md:flex items-center gap-8">
-          {['Features', 'How It Works'].map((item) => (
-            <a key={item} href={`#${item.toLowerCase().replace(' ', '-')}`}
-              className="text-sm transition-colors"
-              style={{ color: 'var(--text-secondary)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-primary)')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-secondary)')}
-            >{item}</a>
-          ))}
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href={ROUTES.LOGIN}>
-            <button className="btn-ghost text-sm">Log in</button>
-          </Link>
-          <Link href={ROUTES.REGISTER}>
-            <button className="btn-primary text-sm">Get Started</button>
-          </Link>
-        </div>
-      </nav>
+    <div className="relative flex min-h-screen flex-col bg-background selection:bg-primary/10 selection:text-primary">
+      <Navbar />
 
-      {/* ── Hero ── */}
-      <section className="relative pt-32 pb-24 px-8 text-center overflow-hidden bg-grid">
-        {/* Radial glow */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[600px] h-[600px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(79,255,218,0.06) 0%, transparent 70%)' }} />
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: 'easeOut' }}
-          className="relative max-w-4xl mx-auto"
-        >
-          <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full text-sm"
-            style={{ background: 'rgba(79,255,218,0.08)', border: '1px solid var(--border-accent)', color: 'var(--accent-primary)' }}>
-            <Star size={13} />
-            <span>Real-time Collaborative Study</span>
-          </div>
-
-          <h1 className="font-display text-6xl md:text-7xl font-bold mb-6 leading-tight">
-            <span style={{ color: 'var(--text-primary)' }}>Focus Together.</span>
-            <br />
-            <span className="gradient-text text-glow">Achieve More.</span>
-          </h1>
-
-          <p className="text-xl mb-10 max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-            Create virtual study rooms, track sessions with live timers, chat with study partners,
-            and build consistent habits — all in one beautifully focused space.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href={ROUTES.REGISTER}>
-              <motion.button
-                className="btn-primary flex items-center gap-2 text-base px-8 py-4"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Start Studying Free <ArrowRight size={18} />
-              </motion.button>
-            </Link>
-            <Link href={ROUTES.ROOMS}>
-              <button className="btn-ghost flex items-center gap-2 text-base px-8 py-4">
-                Browse Rooms
-              </button>
-            </Link>
-          </div>
-        </motion.div>
-
-        {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.6 }}
-          className="flex items-center justify-center gap-12 mt-20"
-        >
-          {[['10K+', 'Study Hours'], ['2K+', 'Active Rooms'], ['98%', 'Satisfaction']].map(([val, label]) => (
-            <div key={label} className="text-center">
-              <p className="font-display text-3xl font-bold gradient-text">{val}</p>
-              <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>{label}</p>
-            </div>
-          ))}
-        </motion.div>
-      </section>
-
-      {/* ── Features ── */}
-      <section id="features" className="py-24 px-8 max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <h2 className="font-display text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-            Everything you need to <span className="gradient-text">stay focused</span>
-          </h2>
-          <p style={{ color: 'var(--text-secondary)' }}>
-            Built for serious students who want accountability and community.
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {features.map((f, i) => (
+      <main className="flex-1">
+        {/* Hero Section */}
+        <SectionContainer className="relative overflow-hidden pt-24 md:pt-32 lg:pt-40 bg-grid">
+          <div className="absolute inset-0 bg-background/90" />
+          <PageContainer className="relative z-10 flex flex-col items-center text-center">
             <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5 }}
-              whileHover={{ y: -4 }}
-              className="glass-card p-6 cursor-default"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+              className="flex flex-col items-center"
             >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
-                style={{ background: 'rgba(79,255,218,0.1)' }}>
-                <f.icon size={20} style={{ color: 'var(--accent-primary)' }} />
+              <div className="mb-6 inline-flex items-center rounded-full border border-border bg-muted/50 px-3 py-1 text-sm font-medium">
+                <span className="flex h-2 w-2 rounded-full bg-zinc-400 mr-2" />
+                Collaborative study platform
               </div>
-              <h3 className="font-display font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>{f.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{f.desc}</p>
+
+              <h1 className="max-w-4xl text-5xl font-semibold tracking-tight sm:text-6xl md:text-7xl">
+                Focus Together. <br className="hidden sm:inline" />
+                <span className="text-muted-foreground">Achieve More.</span>
+              </h1>
+
+              <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
+                Create virtual study rooms, track sessions with live timers, chat with study partners,
+                and build consistent habits — all in one beautifully focused space.
+              </p>
+
+              <div className="mt-10 flex flex-col sm:flex-row gap-4">
+                <Button size="lg" asChild>
+                  <Link href={ROUTES.REGISTER}>
+                    Start Studying Free
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild>
+                  <Link href={ROUTES.ROOMS}>Browse Public Rooms</Link>
+                </Button>
+              </div>
             </motion.div>
-          ))}
-        </div>
-      </section>
+          </PageContainer>
+        </SectionContainer>
 
-      {/* ── How It Works ── */}
-      <section id="how-it-works" className="py-24 px-8" style={{ background: 'var(--bg-secondary)' }}>
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="font-display text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-              Up and running in <span className="gradient-text">3 steps</span>
-            </h2>
-          </motion.div>
+        {/* Stats Section */}
+        <SectionContainer className="border-t border-border bg-muted/20 py-12">
+          <PageContainer>
+            <div className="grid grid-cols-2 gap-8 md:grid-cols-4 text-center">
+              {[
+                { value: "10K+", label: "Study Hours" },
+                { value: "2K+", label: "Active Rooms" },
+                { value: "98%", label: "Satisfaction" },
+                { value: "24/7", label: "Availability" },
+              ].map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                >
+                  <div className="text-3xl font-semibold tracking-tight">{stat.value}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">{stat.label}</div>
+                </motion.div>
+              ))}
+            </div>
+          </PageContainer>
+        </SectionContainer>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((s, i) => (
-              <motion.div
-                key={s.step}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-                className="relative"
-              >
-                <div className="text-6xl font-display font-bold mb-4"
-                  style={{ color: 'rgba(79,255,218,0.12)', WebkitTextStroke: '1px rgba(79,255,218,0.2)' }}>
-                  {s.step}
-                </div>
-                <h3 className="font-display font-bold text-xl mb-2" style={{ color: 'var(--text-primary)' }}>{s.title}</h3>
-                <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{s.desc}</p>
-              </motion.div>
-            ))}
+        {/* Features Section */}
+        <SectionContainer>
+          <PageContainer>
+            <div className="mb-16 md:text-center">
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Everything you need to stay focused
+              </h2>
+              <p className="mt-4 text-lg text-muted-foreground md:max-w-2xl md:mx-auto">
+                Built for serious students who want accountability and community. No distractions, just features that help you study.
+              </p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              {features.map((feature, i) => (
+                <motion.div
+                  key={feature.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                >
+                  <Card className="h-full transition-colors hover:bg-muted/50">
+                    <CardHeader>
+                      <feature.icon className="h-6 w-6 text-foreground mb-4" />
+                      <CardTitle>{feature.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CardDescription className="text-base">{feature.desc}</CardDescription>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </PageContainer>
+        </SectionContainer>
+
+        {/* CTA Section */}
+        <SectionContainer className="border-t border-border">
+          <PageContainer>
+            <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/20 px-6 py-16 text-center sm:px-12 md:py-24">
+              <BookOpen className="mb-6 h-10 w-10 text-muted-foreground" />
+              <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Ready to transform your study habits?
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+                Join thousands of students already using StudyRoom to build better habits and achieve their goals.
+              </p>
+              <div className="mt-8">
+                <Button size="lg" asChild>
+                  <Link href={ROUTES.REGISTER}>Create Your Free Room</Link>
+                </Button>
+              </div>
+            </div>
+          </PageContainer>
+        </SectionContainer>
+      </main>
+
+      <footer className="border-t border-border py-8 md:py-12">
+        <PageContainer className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-4 w-4" />
+            <span className="text-sm font-semibold tracking-tight">StudyRoom</span>
           </div>
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <section className="py-24 px-8 text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          className="max-w-2xl mx-auto glass-card-elevated p-16 glow-accent"
-        >
-          <Zap size={36} style={{ color: 'var(--accent-primary)' }} className="mx-auto mb-6" />
-          <h2 className="font-display text-4xl font-bold mb-4" style={{ color: 'var(--text-primary)' }}>
-            Ready to focus?
-          </h2>
-          <p className="mb-8" style={{ color: 'var(--text-secondary)' }}>
-            Join thousands of students already using StudyRoom to build better habits.
+          <p className="text-sm text-muted-foreground">
+            &copy; {new Date().getFullYear()} StudyRoom. Built for focused learners.
           </p>
-          <Link href={ROUTES.REGISTER}>
-            <motion.button
-              className="btn-primary text-base px-10 py-4"
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              Create Your Free Room
-            </motion.button>
-          </Link>
-        </motion.div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-8 px-8 text-center" style={{ borderTop: '1px solid var(--border-subtle)', color: 'var(--text-muted)' }}>
-        <p className="text-sm">© 2025 StudyRoom. Built with ❤️ for learners everywhere.</p>
+        </PageContainer>
       </footer>
-    </main>
-  );
+    </div>
+  )
 }
