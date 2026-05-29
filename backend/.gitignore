@@ -28,3 +28,4 @@ docker-compose.override.yml
 *.log
 
 .codectx_cache/
+.ruff_cache

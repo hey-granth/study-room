@@ -2110,6 +2110,11 @@ dev = [
     { name = "types-redis" },
 ]
 
+[package.dev-dependencies]
+dev = [
+    { name = "websocket-client" },
+]
+
 [package.metadata]
 requires-dist = [
     { name = "aiofiles", specifier = ">=24.1.0" },
@@ -2139,6 +2144,9 @@ requires-dist = [
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.32.0" },
 ]
 provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [{ name = "websocket-client", specifier = ">=1.9.0" }]
 
 [[package]]
 name = "typer"

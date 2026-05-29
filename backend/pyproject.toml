@@ -63,3 +63,8 @@ addopts = "--cov=app --cov-report=term-missing --cov-fail-under=85"
 [tool.coverage.run]
 source = ["app"]
 omit = ["app/db/migrations/*", "tests/*"]
+
+[dependency-groups]
+dev = [
+    "websocket-client>=1.9.0",
+]
