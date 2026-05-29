@@ -1,8 +1,10 @@
-"""Database engine, session factory, and base model."""
+"""Database engine, session factory, and declarative base."""
+
+from __future__ import annotations
 
 from collections.abc import AsyncGenerator
-from typing import Any
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -12,29 +14,25 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.config import get_settings
 
+settings = get_settings()
 
-class Base(DeclarativeBase):
-    """SQLAlchemy declarative base for all models."""
-
-    pass
-
-
-def _build_engine() -> Any:
-    """Build the async SQLAlchemy engine from settings."""
-    settings = get_settings()
-    url = str(settings.DATABASE_URL).replace("postgresql://", "postgresql+asyncpg://").replace(
-        "postgres://", "postgresql+asyncpg://"
-    )
-    return create_async_engine(
-        url,
-        pool_size=settings.DATABASE_POOL_SIZE,
-        max_overflow=settings.DATABASE_MAX_OVERFLOW,
-        echo=settings.DEBUG,
-        future=True,
-    )
-
-
-engine = _build_engine()
+# No ssl=require — PostgreSQL runs on the internal Docker bridge network.
+# pool_pre_ping=True is critical: detects stale connections after a container
+# restart without waiting for a query to fail.
+engine = create_async_engine(
+    settings.DATABASE_URL,
+    echo=settings.DEBUG,
+    pool_size=settings.DATABASE_POOL_SIZE,
+    max_overflow=settings.DATABASE_MAX_OVERFLOW,
+    pool_timeout=settings.DATABASE_POOL_TIMEOUT,
+    pool_recycle=settings.DATABASE_POOL_RECYCLE,
+    pool_pre_ping=settings.DATABASE_POOL_PRE_PING,
+    connect_args={
+        "server_settings": {
+            "application_name": settings.APP_NAME,
+        },
+    },
+)
 
 AsyncSessionLocal: async_sessionmaker[AsyncSession] = async_sessionmaker(
     bind=engine,
@@ -43,6 +41,12 @@ AsyncSessionLocal: async_sessionmaker[AsyncSession] = async_sessionmaker(
     autoflush=False,
     autocommit=False,
 )
+
+
+class Base(DeclarativeBase):
+    """SQLAlchemy declarative base for all models."""
+
+    pass
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -54,3 +58,15 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
         except Exception:
             await session.rollback()
             raise
+        finally:
+            await session.close()
+
+
+async def check_db_connection() -> bool:
+    """Health check — returns True if the database is reachable."""
+    try:
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+        return True
+    except Exception:
+        return False

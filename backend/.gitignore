@@ -1,8 +1,28 @@
-.pytest_cache
+# Python
+.pytest_cache/
 .coverage
-.venv
-__pycache__
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment — NEVER commit secrets
 .env
+
+# SQLite dev database (dev only — production uses PostgreSQL)
 *.db
-.pyc
 *.sqlite
+*.sqlite3
+
+# Docker local overrides
+docker-compose.override.yml
+
+# Misc
+.DS_Store
+*.log

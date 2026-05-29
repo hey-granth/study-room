@@ -1,61 +1,89 @@
 """Async Redis client factory and connection management."""
 
+from __future__ import annotations
+
 import logging
-from typing import Any
+from collections.abc import AsyncGenerator
 
 import redis.asyncio as aioredis
 from redis.asyncio import Redis
-from redis.asyncio.connection import ConnectionPool
+from redis.backoff import ExponentialBackoff
+from redis.retry import Retry
 
 from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
-_pool: ConnectionPool | None = None
-_client: Redis[Any] | None = None
+settings = get_settings()
+
+_redis_pool: aioredis.ConnectionPool | None = None
 
 
-def get_redis_pool() -> ConnectionPool:
-    """Return a singleton Redis connection pool."""
-    global _pool
-    if _pool is None:
-        settings = get_settings()
-        url = str(settings.REDIS_URL)
-        _pool = aioredis.ConnectionPool.from_url(
-            url,
-            decode_responses=True,
-            max_connections=20,
-        )
+def create_redis_pool() -> aioredis.ConnectionPool:
+    """Create a new Redis connection pool from settings.
+
+    Uses redis:// (no TLS) because traffic stays on the Docker bridge
+    network — TLS overhead is unnecessary and wastes CPU on t3.micro.
+    """
+    return aioredis.ConnectionPool.from_url(
+        str(settings.REDIS_URL),
+        max_connections=settings.REDIS_MAX_CONNECTIONS,
+        decode_responses=settings.REDIS_DECODE_RESPONSES,
+        socket_timeout=settings.REDIS_SOCKET_TIMEOUT,
+        socket_connect_timeout=settings.REDIS_SOCKET_CONNECT_TIMEOUT,
+        retry_on_timeout=settings.REDIS_RETRY_ON_TIMEOUT,
+        retry=Retry(ExponentialBackoff(cap=10, base=1), retries=3),
+        health_check_interval=30,
+    )
+
+
+def get_redis_pool() -> aioredis.ConnectionPool:
+    """Return singleton Redis connection pool, creating it on first call."""
+    global _redis_pool
+    if _redis_pool is None:
+        _redis_pool = create_redis_pool()
         logger.info("Redis connection pool created")
-    return _pool
+    return _redis_pool
 
 
-def get_redis_client() -> Redis[Any]:
-    """Return a singleton async Redis client."""
-    global _client
-    if _client is None:
-        pool = get_redis_pool()
-        _client = aioredis.Redis(connection_pool=pool)
-    return _client
+def get_redis_client() -> Redis:  # type: ignore[type-arg]
+    """Return an async Redis client backed by the singleton pool."""
+    return aioredis.Redis(connection_pool=get_redis_pool())
 
 
-async def close_redis() -> None:
-    """Close the Redis connection pool on shutdown."""
-    global _pool, _client
-    if _client is not None:
-        await _client.aclose()
-        _client = None
-    if _pool is not None:
-        await _pool.aclose()
-        _pool = None
-    logger.info("Redis connection closed")
+async def get_redis() -> AsyncGenerator[Redis, None]:  # type: ignore[type-arg]
+    """FastAPI dependency that yields an async Redis client."""
+    client: Redis = aioredis.Redis(connection_pool=get_redis_pool())  # type: ignore[type-arg]
+    try:
+        yield client
+    finally:
+        await client.aclose()
 
 
 async def ping_redis() -> bool:
     """Health check — returns True if Redis is reachable."""
     try:
-        client = get_redis_client()
-        return bool(await client.ping())
+        client: Redis = aioredis.Redis(connection_pool=get_redis_pool())  # type: ignore[type-arg]
+        result = bool(await client.ping())
+        await client.aclose()
+        return result
     except Exception as e:
         logger.error(f"Redis ping failed: {e}")
         return False
+
+
+# Alias for backwards compatibility with existing call sites
+check_redis_connection = ping_redis
+
+
+async def close_redis_pool() -> None:
+    """Drain and close the Redis connection pool on application shutdown."""
+    global _redis_pool
+    if _redis_pool is not None:
+        await _redis_pool.aclose()
+        _redis_pool = None
+        logger.info("Redis connection pool closed")
+
+
+# Alias for backwards compatibility
+close_redis = close_redis_pool
