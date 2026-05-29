@@ -16,7 +16,7 @@ import { QUERY_KEYS, ROUTES } from "@/constants"
 import type { RoomDetail, StudySession, Page } from "@/types/api"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { ScrollArea } from "@/components/ui/scroll-area"
+
 
 export default function RoomPage() {
   const { id } = useParams<{ id: string }>()
