@@ -24,9 +24,7 @@ class Room(Base, UUIDMixin, TimestampMixin):
 
     name: Mapped[str] = mapped_column(String(100), nullable=False)
     description: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    invite_code: Mapped[str] = mapped_column(
-        String(8), unique=True, index=True, nullable=False
-    )
+    invite_code: Mapped[str] = mapped_column(String(8), unique=True, index=True, nullable=False)
     is_public: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     max_participants: Mapped[int] = mapped_column(Integer, default=20, nullable=False)
     owner_id: Mapped[uuid.UUID] = mapped_column(

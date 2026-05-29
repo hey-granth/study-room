@@ -30,13 +30,9 @@ class MessageRepository(BaseRepository[Message]):
             Tuple of (message list, total count).
         """
         base_q = (
-            select(Message)
-            .options(selectinload(Message.user))
-            .where(Message.room_id == room_id)
+            select(Message).options(selectinload(Message.user)).where(Message.room_id == room_id)
         )
-        count_result = await self.db.execute(
-            select(func.count()).select_from(base_q.subquery())
-        )
+        count_result = await self.db.execute(select(func.count()).select_from(base_q.subquery()))
         total = count_result.scalar_one() or 0
 
         result = await self.db.execute(

@@ -190,6 +190,7 @@ class RoomService:
             raise ValidationError("Room is full")
 
         await self.repo.add_member(room_id, user_id)
+        self.db.expire(room, ["members"])
         room = await self.repo.get_with_members(room_id)
         assert room is not None
         return self._to_detail(room)
@@ -224,6 +225,7 @@ class RoomService:
             raise ValidationError("Room is full")
 
         await self.repo.add_member(str(room.id), user_id)
+        self.db.expire(room, ["members"])
         room = await self.repo.get_with_members(str(room.id))
         assert room is not None
         return self._to_detail(room)
@@ -245,6 +247,7 @@ class RoomService:
         if str(room.owner_id) == user_id:
             raise ValidationError("Room owner cannot leave. Transfer ownership or delete the room.")
         await self.repo.remove_member(room_id, user_id)
+        self.db.expire(room, ["members"])
 
     async def regenerate_invite_code(self, room_id: str, owner_id: str) -> str:
         """Regenerate the invite code for a room.

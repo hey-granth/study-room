@@ -67,9 +67,7 @@ class RoomRepository(BaseRepository[Room]):
         Returns:
             Tuple of (room list, total count).
         """
-        member_subq = select(room_members.c.room_id).where(
-            room_members.c.user_id == user_id
-        )
+        member_subq = select(room_members.c.room_id).where(room_members.c.user_id == user_id)
 
         if filter_type == "owned":
             condition = Room.owner_id == user_id
@@ -82,9 +80,7 @@ class RoomRepository(BaseRepository[Room]):
         if search:
             base_q = base_q.where(Room.name.ilike(f"%{search}%"))
 
-        count_result = await self.db.execute(
-            select(func.count()).select_from(base_q.subquery())
-        )
+        count_result = await self.db.execute(select(func.count()).select_from(base_q.subquery()))
         total = count_result.scalar_one() or 0
 
         result = await self.db.execute(
@@ -103,7 +99,9 @@ class RoomRepository(BaseRepository[Room]):
             True if the user is a member.
         """
         result = await self.db.execute(
-            select(func.count()).select_from(room_members).where(
+            select(func.count())
+            .select_from(room_members)
+            .where(
                 and_(
                     room_members.c.room_id == room_id,
                     room_members.c.user_id == user_id,
@@ -119,9 +117,7 @@ class RoomRepository(BaseRepository[Room]):
             room_id: Room UUID string.
             user_id: User UUID string.
         """
-        await self.db.execute(
-            room_members.insert().values(room_id=room_id, user_id=user_id)
-        )
+        await self.db.execute(room_members.insert().values(room_id=room_id, user_id=user_id))
         await self.db.flush()
 
     async def remove_member(self, room_id: str, user_id: str) -> None:
@@ -151,8 +147,6 @@ class RoomRepository(BaseRepository[Room]):
             Number of members.
         """
         result = await self.db.execute(
-            select(func.count()).select_from(room_members).where(
-                room_members.c.room_id == room_id
-            )
+            select(func.count()).select_from(room_members).where(room_members.c.room_id == room_id)
         )
         return result.scalar_one() or 0

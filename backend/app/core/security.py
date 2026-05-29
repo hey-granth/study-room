@@ -12,19 +12,20 @@ from app.config import get_settings
 
 logger = logging.getLogger(__name__)
 
+
 def hash_password(password: str) -> str:
     """Hash a plain-text password using bcrypt."""
     # bcrypt requires bytes
-    pwd_bytes = password.encode('utf-8')
+    pwd_bytes = password.encode("utf-8")
     salt = bcrypt.gensalt()
     hashed_bytes = bcrypt.hashpw(pwd_bytes, salt)
-    return hashed_bytes.decode('utf-8')
+    return hashed_bytes.decode("utf-8")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain-text password against a bcrypt hash."""
-    pwd_bytes = plain_password.encode('utf-8')
-    hashed_bytes = hashed_password.encode('utf-8')
+    pwd_bytes = plain_password.encode("utf-8")
+    hashed_bytes = hashed_password.encode("utf-8")
     return bcrypt.checkpw(pwd_bytes, hashed_bytes)
 
 
@@ -48,7 +49,11 @@ def create_access_token(user_id: str, jti: str | None = None) -> str:
         "iat": now,
         "exp": expire,
     }
-    return str(jwt.encode(payload, settings.JWT_SECRET_KEY.get_secret_value(), algorithm=settings.JWT_ALGORITHM))
+    return str(
+        jwt.encode(
+            payload, settings.JWT_SECRET_KEY.get_secret_value(), algorithm=settings.JWT_ALGORITHM
+        )
+    )
 
 
 def create_refresh_token(user_id: str, jti: str | None = None) -> str:
@@ -71,7 +76,11 @@ def create_refresh_token(user_id: str, jti: str | None = None) -> str:
         "iat": now,
         "exp": expire,
     }
-    return str(jwt.encode(payload, settings.JWT_SECRET_KEY.get_secret_value(), algorithm=settings.JWT_ALGORITHM))
+    return str(
+        jwt.encode(
+            payload, settings.JWT_SECRET_KEY.get_secret_value(), algorithm=settings.JWT_ALGORITHM
+        )
+    )
 
 
 def decode_token(token: str) -> dict[str, Any]:

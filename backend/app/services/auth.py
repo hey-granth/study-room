@@ -62,12 +62,15 @@ class AuthService:
         user = await self.user_repo.create(user)
 
         from app.schemas.user import UserResponse
+
         user_response = UserResponse.model_validate(user)
         access_token = create_access_token(str(user.id))
         refresh_token = create_refresh_token(str(user.id))
 
         logger.info(f"User registered: {user.username}")
-        return UserWithToken(user=user_response, access_token=access_token, refresh_token=refresh_token)
+        return UserWithToken(
+            user=user_response, access_token=access_token, refresh_token=refresh_token
+        )
 
     async def login(self, schema: LoginRequest) -> UserWithToken:
         """Authenticate a user and return tokens.
@@ -88,12 +91,15 @@ class AuthService:
             raise UnauthorizedError("Account is inactive")
 
         from app.schemas.user import UserResponse
+
         user_response = UserResponse.model_validate(user)
         access_token = create_access_token(str(user.id))
         refresh_token = create_refresh_token(str(user.id))
 
         logger.info(f"User logged in: {user.username}")
-        return UserWithToken(user=user_response, access_token=access_token, refresh_token=refresh_token)
+        return UserWithToken(
+            user=user_response, access_token=access_token, refresh_token=refresh_token
+        )
 
     async def refresh(self, schema: RefreshRequest) -> TokenPair:
         """Issue a new token pair from a valid refresh token.

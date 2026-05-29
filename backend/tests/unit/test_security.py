@@ -65,6 +65,7 @@ class TestJWT:
     def test_tampered_token_raises(self) -> None:
         """Modified token should raise on decode."""
         from jose import JWTError
+
         token = create_access_token(str(uuid.uuid4()))
         tampered = token[:-5] + "XXXXX"
         with pytest.raises(JWTError):
@@ -73,6 +74,7 @@ class TestJWT:
     def test_expired_token_raises(self) -> None:
         """Expired token should raise JWTError."""
         from jose import JWTError
+
         settings = get_settings()
         payload = {
             "sub": str(uuid.uuid4()),

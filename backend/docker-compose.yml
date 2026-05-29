@@ -1,79 +1,28 @@
 version: "3.9"
 
+# Production docker-compose for StudyRoom API.
+# PostgreSQL is hosted on Neon (external managed service).
+# Redis is hosted on Upstash (external managed service).
+# This file only runs the FastAPI application container.
+
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: studyroom_db
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  redis:
-    image: redis:7-alpine
-    container_name: studyroom_redis
-    restart: unless-stopped
-    command: >
-      redis-server
-      --requirepass ${REDIS_PASSWORD}
-      --maxmemory 128mb
-      --maxmemory-policy allkeys-lru
-      --save 60 1
-      --loglevel warning
-    volumes:
-      - redis_data:/data
-    networks:
-      - internal
-    healthcheck:
-      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   api:
     image: ${ECR_IMAGE}
     container_name: studyroom_api
     restart: unless-stopped
     env_file: .env
-    environment:
-      # Constructed here so they reference internal Docker network hostnames
-      # Do NOT set DATABASE_URL or REDIS_URL in the .env file
-      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
-      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
     ports:
       # CRITICAL: bind to 127.0.0.1 only — Nginx proxies to this.
-      # Never use 0.0.0.0:8000 or the API will be exposed directly to the internet.
+      # Never expose 0.0.0.0:8000 or the API is directly internet-accessible.
       - "127.0.0.1:8000:8000"
-    networks:
-      - internal
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-
-volumes:
-  postgres_data:
-    driver: local
-  redis_data:
-    driver: local
-
-networks:
-  internal:
-    driver: bridge
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s

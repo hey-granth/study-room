@@ -92,14 +92,21 @@ class SessionService:
             raise NotFoundError("No active session in this room")
 
         now = datetime.now(timezone.utc)
-        started = session.started_at.replace(tzinfo=timezone.utc) if session.started_at.tzinfo is None else session.started_at
+        started = (
+            session.started_at.replace(tzinfo=timezone.utc)
+            if session.started_at.tzinfo is None
+            else session.started_at
+        )
         duration = int((now - started).total_seconds())
 
-        updated = await self.session_repo.update(session, {
-            "ended_at": now,
-            "duration_seconds": duration,
-            "is_active": False,
-        })
+        updated = await self.session_repo.update(
+            session,
+            {
+                "ended_at": now,
+                "duration_seconds": duration,
+                "is_active": False,
+            },
+        )
 
         # Clear Redis key
         redis_key = REDIS_ACTIVE_SESSION_KEY.format(room_id=room_id)

@@ -73,9 +73,7 @@ async def websocket_room(
         user_id = await _authenticate_ws(token)
     except ValueError as e:
         await websocket.accept()
-        await websocket.send_json(
-            make_ws_message(WSMessageType.ERROR, {"message": str(e)})
-        )
+        await websocket.send_json(make_ws_message(WSMessageType.ERROR, {"message": str(e)}))
         await websocket.close(code=4001)
         return
 

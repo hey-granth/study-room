@@ -30,6 +30,10 @@ TestSessionLocal: async_sessionmaker[AsyncSession] = async_sessionmaker(
     autoflush=False,
 )
 
+import app.db.base as db_base
+
+db_base.AsyncSessionLocal = TestSessionLocal
+
 
 @pytest_asyncio.fixture(scope="session")
 async def setup_db() -> AsyncGenerator[None, None]:
@@ -71,8 +75,10 @@ async def async_client(db: AsyncSession, test_redis: Any) -> AsyncGenerator[Asyn
     app.dependency_overrides[get_db] = override_get_db
     # Override redis client used in dependencies
     import app.redis.client as redis_module
+
     original = redis_module.get_redis_client
     redis_module.get_redis_client = override_get_redis  # type: ignore[assignment]
+    redis_module._redis_client_override = test_redis
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -80,12 +86,14 @@ async def async_client(db: AsyncSession, test_redis: Any) -> AsyncGenerator[Asyn
 
     app.dependency_overrides.clear()
     redis_module.get_redis_client = original
+    redis_module._redis_client_override = None
 
 
 @pytest_asyncio.fixture
 async def test_user(db: AsyncSession) -> User:
     """Create and return a test user."""
     from app.repositories.user import UserRepository
+
     repo = UserRepository(db)
     user = User(
         id=str(uuid.uuid4()),
@@ -102,6 +110,7 @@ async def test_user(db: AsyncSession) -> User:
 async def test_room(db: AsyncSession, test_user: User) -> Room:
     """Create and return a test room owned by test_user."""
     from app.repositories.room import RoomRepository
+
     repo = RoomRepository(db)
     room = Room(
         id=str(uuid.uuid4()),

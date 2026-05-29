@@ -52,9 +52,7 @@ class SessionRepository(BaseRepository[StudySession]):
             .where(StudySession.room_id == room_id)
             .order_by(StudySession.started_at.desc())
         )
-        count_result = await self.db.execute(
-            select(func.count()).select_from(base_q.subquery())
-        )
+        count_result = await self.db.execute(select(func.count()).select_from(base_q.subquery()))
         total = count_result.scalar_one() or 0
         result = await self.db.execute(base_q.offset(skip).limit(limit))
         return list(result.scalars().all()), total
@@ -89,7 +87,9 @@ class SessionRepository(BaseRepository[StudySession]):
         """
         week_ago = datetime.now(timezone.utc) - timedelta(days=7)
         result = await self.db.execute(
-            select(func.count()).select_from(StudySession).where(
+            select(func.count())
+            .select_from(StudySession)
+            .where(
                 and_(
                     StudySession.started_by == user_id,
                     StudySession.started_at >= week_ago,

@@ -1,7 +1,7 @@
 #!/bin/bash
 # scripts/deploy.sh
-# Manual deployment script — use when you want to deploy without triggering GitHub Actions.
-# Run this on the EC2 instance: bash /home/ubuntu/studyroom/scripts/deploy.sh
+# Manual deployment script — use when deploying without triggering GitHub Actions.
+# Run this ON the EC2 instance: bash /home/ubuntu/studyroom/scripts/deploy.sh
 set -euo pipefail
 
 DEPLOY_DIR="/home/ubuntu/studyroom"

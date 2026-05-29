@@ -68,9 +68,7 @@ class ConnectionManager:
         payload = json.dumps({"room_id": room_id, "data": message})
         await redis.publish(channel, payload)
 
-    async def send_personal(
-        self, user_id: str, room_id: str, message: dict[str, Any]
-    ) -> None:
+    async def send_personal(self, user_id: str, room_id: str, message: dict[str, Any]) -> None:
         """Send a message directly to a specific user's WebSocket.
 
         Args:

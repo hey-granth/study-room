@@ -16,9 +16,9 @@ from app.config import get_settings
 
 settings = get_settings()
 
-# No ssl=require — PostgreSQL runs on the internal Docker bridge network.
-# pool_pre_ping=True is critical: detects stale connections after a container
-# restart without waiting for a query to fail.
+# Neon PostgreSQL requires SSL. The sslmode=require in DATABASE_URL handles this
+# for asyncpg automatically. pool_pre_ping=True detects dropped connections
+# (important for serverless databases like Neon that may close idle connections).
 engine = create_async_engine(
     settings.DATABASE_URL,
     echo=settings.DEBUG,

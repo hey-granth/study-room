@@ -25,17 +25,17 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
 
-    # Database — constructed and injected by docker-compose environment block.
-    # Must use postgresql+asyncpg:// prefix for async driver (asyncpg).
+    # Database — Neon PostgreSQL via asyncpg.
+    # Must use postgresql+asyncpg:// prefix.
+    # Must include ?sslmode=require for Neon.
     DATABASE_URL: str
     DATABASE_POOL_SIZE: int = 5
-    DATABASE_MAX_OVERFLOW: int = 10
+    DATABASE_MAX_OVERFLOW: int = 5
     DATABASE_POOL_TIMEOUT: int = 30
     DATABASE_POOL_RECYCLE: int = 1800  # 30 min — prevents stale connections
-    DATABASE_POOL_PRE_PING: bool = True  # detect dropped connections
+    DATABASE_POOL_PRE_PING: bool = True
 
-    # Redis — constructed and injected by docker-compose environment block.
-    # Uses redis:// (no TLS) because traffic stays on the Docker bridge network.
+    # Redis — Upstash via TLS (rediss://).
     REDIS_URL: str
     REDIS_MAX_CONNECTIONS: int = 10
     REDIS_SOCKET_TIMEOUT: float = 5.0
@@ -61,6 +61,7 @@ class Settings(BaseSettings):
         """Parse ALLOWED_ORIGINS from JSON string or list."""
         if isinstance(v, str):
             import json
+
             return json.loads(v)
         return v  # type: ignore[return-value]
 
@@ -70,7 +71,7 @@ class Settings(BaseSettings):
         if not v.startswith("postgresql+asyncpg://"):
             raise ValueError(
                 "DATABASE_URL must use postgresql+asyncpg:// prefix. "
-                "SQLite is not supported in production."
+                "For Neon, prepend 'postgresql+asyncpg://' and append '?sslmode=require'."
             )
         return v
 
@@ -78,7 +79,9 @@ class Settings(BaseSettings):
     @classmethod
     def validate_redis_url(cls, v: str) -> str:
         if not v.startswith("redis://") and not v.startswith("rediss://"):
-            raise ValueError("REDIS_URL must use redis:// or rediss:// scheme.")
+            raise ValueError(
+                "REDIS_URL must use redis:// or rediss:// scheme. Upstash requires rediss:// (TLS)."
+            )
         return v
 
 

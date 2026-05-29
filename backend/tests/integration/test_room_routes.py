@@ -74,7 +74,7 @@ class TestRoomCRUD:
         resp = await async_client.delete(f"/api/v1/rooms/{room_id}", headers=headers)
         assert resp.status_code == 403
 
-    async def test_no_auth_returns_403(self, async_client: AsyncClient) -> None:
-        """Unauthenticated request to rooms returns 403."""
+    async def test_no_auth_returns_401(self, async_client: AsyncClient) -> None:
+        """Unauthenticated request to rooms returns 401."""
         resp = await async_client.get("/api/v1/rooms/")
-        assert resp.status_code == 403
+        assert resp.status_code == 401

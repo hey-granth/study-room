@@ -17,13 +17,15 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 _redis_pool: aioredis.ConnectionPool | None = None
+_redis_client_override: Redis | None = None
 
 
 def create_redis_pool() -> aioredis.ConnectionPool:
     """Create a new Redis connection pool from settings.
 
-    Uses redis:// (no TLS) because traffic stays on the Docker bridge
-    network — TLS overhead is unnecessary and wastes CPU on t3.micro.
+    Upstash requires TLS (rediss:// scheme). The ssl=True flag is
+    automatically inferred by redis-py from the rediss:// URL prefix,
+    so no explicit ssl argument is needed.
     """
     return aioredis.ConnectionPool.from_url(
         str(settings.REDIS_URL),
@@ -48,11 +50,19 @@ def get_redis_pool() -> aioredis.ConnectionPool:
 
 def get_redis_client() -> Redis:  # type: ignore[type-arg]
     """Return an async Redis client backed by the singleton pool."""
+    global _redis_client_override
+    if _redis_client_override is not None:
+        return _redis_client_override
     return aioredis.Redis(connection_pool=get_redis_pool())
 
 
 async def get_redis() -> AsyncGenerator[Redis, None]:  # type: ignore[type-arg]
     """FastAPI dependency that yields an async Redis client."""
+    global _redis_client_override
+    if _redis_client_override is not None:
+        yield _redis_client_override
+        return
+
     client: Redis = aioredis.Redis(connection_pool=get_redis_pool())  # type: ignore[type-arg]
     try:
         yield client

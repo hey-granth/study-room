@@ -89,8 +89,7 @@ def create_app() -> FastAPI:
         response: Response = await call_next(request)
         duration_ms = (time.perf_counter() - start) * 1000
         logger.info(
-            f"{request.method} {request.url.path} → {response.status_code} "
-            f"({duration_ms:.1f}ms)"
+            f"{request.method} {request.url.path} → {response.status_code} ({duration_ms:.1f}ms)"
         )
         return response
 

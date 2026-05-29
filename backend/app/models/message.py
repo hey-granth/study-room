@@ -15,9 +15,7 @@ class Message(Base, UUIDMixin):
     """Represents a chat or system message in a room."""
 
     __tablename__ = "messages"
-    __table_args__ = (
-        Index("ix_messages_room_sent", "room_id", "sent_at"),
-    )
+    __table_args__ = (Index("ix_messages_room_sent", "room_id", "sent_at"),)
 
     room_id: Mapped[uuid.UUID] = mapped_column(
         String(36), ForeignKey("rooms.id", ondelete="CASCADE"), nullable=False

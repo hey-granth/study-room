@@ -19,11 +19,12 @@ target_metadata = Base.metadata
 
 
 def get_url() -> str:
-    """Build the async database URL from settings."""
-    url = str(get_settings().DATABASE_URL)
-    return url.replace("postgresql://", "postgresql+asyncpg://").replace(
-        "postgres://", "postgresql+asyncpg://"
-    )
+    """Return the async database URL from settings.
+
+    The DATABASE_URL in .env must already use postgresql+asyncpg:// prefix
+    and include ?sslmode=require for Neon. No transformation is needed.
+    """
+    return str(get_settings().DATABASE_URL)
 
 
 def run_migrations_offline() -> None:

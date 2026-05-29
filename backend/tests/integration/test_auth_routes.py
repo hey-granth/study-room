@@ -95,9 +95,9 @@ class TestLogin:
         assert resp.status_code == 401
 
     async def test_login_no_token_on_protected(self, async_client: AsyncClient) -> None:
-        """Protected endpoint without token returns 403."""
+        """Protected endpoint without token returns 401."""
         resp = await async_client.get("/api/v1/users/me")
-        assert resp.status_code == 403
+        assert resp.status_code == 401
 
 
 @pytest.mark.asyncio
