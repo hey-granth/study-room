@@ -85,7 +85,6 @@ six==1.17.0
 sortedcontainers==2.4.0
 sqlalchemy==2.0.50
 starlette==1.2.0
--e file:///home/granth/PycharmProjects/study-room/backend
 typer==0.26.3
 types-cffi==2.0.0.20260518
 types-passlib==1.7.7.20260211
